@@ -1,0 +1,18 @@
+version: '1'
+services:
+  deviceid-recaptcha:
+    restart: always
+    image: didr
+    container_name: deviceid-recaptcha
+    volumes:
+        - "/tmp:/usr/src/app/logs"
+    expose:
+        - "${EXT_PORT}"
+        - "443"
+    ports:
+        - "${EXT_PORT}:${PORT}"
+        - "443:443"
+    environment:
+        - PORT
+        - CAPTCHA_SITEVERIFY_URI
+        - SECRET_KEY

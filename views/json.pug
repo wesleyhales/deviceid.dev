@@ -1,0 +1,85 @@
+extends base-template
+
+block header
+    style.
+        pre {
+            outline: 1px solid #ccc;
+            padding: 5px;
+            margin: 5px;
+        }
+
+        .string {
+            color: green;
+        }
+
+        .number {
+            color: darkorange;
+        }
+
+        .boolean {
+            color: blue;
+        }
+
+        .null {
+            color: magenta;
+        }
+
+        .key {
+            color: black;
+        }
+
+        .did_attr {
+            color: deeppink;
+        }
+
+        .did_key {
+            color: mediumblue;
+        }
+    script.
+      function output(inp) {
+        document.body.appendChild(document.createElement('pre')).innerHTML = inp;
+      }
+      function syntaxHighlight(json) {
+        if (typeof json != 'string') {
+          json = JSON.stringify(json, undefined, 2);
+        }
+        json = json.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+        return json.replace(/("(\\u[a-zA-Z0-9]{4}|\\[^u]|[^\\"])*"(\s*:)?|\b(true|false|null)\b|-?\d+(?:\.\d*)?(?:[eE][+\-]?\d+)?)/g, function (match) {
+          var cls = 'number';
+          if (/^"/.test(match)) {
+            if (/:$/.test(match)) {
+              cls = 'key';
+              if(match.length > 30){
+                cls = 'did_key';
+              }
+              console.log(match)
+              if(match.indexOf('did_attr') > -1){
+                cls = 'did_attr';
+              }
+            } else {
+              cls = 'string';
+              if (match.length > 30) {
+                cls = 'did_string';
+              }
+            }
+          } else if (/true|false/.test(match)) {
+            cls = 'boolean';
+          } else if (/null/.test(match)) {
+            cls = 'null';
+          }
+          return '<span class="' + cls + '">' + match + '</span>';
+        });
+      }
+
+block content
+    p The key colored <span class="did_key">blue</span> is the Device ID+ residue value. This is the unique identifier created and stored as a cookie.
+    p The value of the key colored <span class="did_attr">pink</span> is the DeviceID+ attribute value. It does not change when the user's browser is switched to incognito mode or when their browsing history is cleared.
+    p This Fraud Profile is explained in detail <a href="">here</a>.
+    div
+      script.
+        output(syntaxHighlight(!{JSON.stringify(riskProfile, null, 2)}));
+    p See <a href="https://f5cloudservices.zendesk.com/hc/en-us/articles/360060250913">this article</a> for more details on Device ID+ residue and attribute values.
+
+
+
+

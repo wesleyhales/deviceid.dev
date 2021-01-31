@@ -1,0 +1,30 @@
+extends base-template
+
+block header
+    script.
+        function onSubmit(token) {
+            document.getElementById("demo-form").submit();
+        }
+    style.
+        .footer {
+            position: fixed;
+            width: 100%;
+            bottom: 0;
+            text-align: center;
+            padding: 0 0 10% 0;
+        }
+
+block content
+    div
+        <div class="log-form">
+        <h2>F5 DeviceID+ Fraud Profile Example</h2>
+        <p>Login below with a fictitious username. Try demo@demo.com or makeup your own.</p>
+        <p>The purpose of this application is explained in detail <a href="">here</a>. It's built to demonstrate how F5 DeviceID+ can be used to strengthen existing application security solutions.</p>
+        <form id="demo-form" action="/deviceid-recaptcha_v3" method="POST">
+        <input type="text" name="username" placeholder="username" />
+        <input type="password" name="password" placeholder="password" />
+        <input type="submit" class="g-recaptcha" data-sitekey="6LfatkAaAAAAAKuEPClXrOweakleGYL1l6GrNzcn" data-callback='onSubmit' data-action='submit' />
+        </form>
+        </div>
+
+
