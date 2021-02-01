@@ -23,8 +23,8 @@ app.get('/v3', (req, res) => {
 })
 
 app.post('/deviceid-recaptcha_v3', (req,res) => {
-  console.log('/recaptcha-verify request >>> Body:');
-  console.log(req.body);
+  // console.log('/recaptcha-verify request >>> Body:');
+  // console.log(req.body);
 
   const userToken = req.body['g-recaptcha-response'];
   if (!userToken) {
@@ -46,26 +46,30 @@ app.post('/deviceid-recaptcha_v3', (req,res) => {
   };
 
   const username = req.body.username;
+  let apg_cookie = getAppCookies(req, res)['_imp_apg_r_'],
+    did_res = 'notfound',
+    did_attr = 'notfound';
 
-  //Device ID+ includes two identifiers – a residue-based identifier and an attribute-based identifier.
-  let decodedDeviceID = decodeURI(getAppCookies(req, res)['_imp_apg_r_']);
-  //console.log(getAppCookies(req, res)['_imp_apg_r_']);
-  decodedDeviceID = JSON.parse(decodeURIComponent(decodedDeviceID));
+  if(!apg_cookie){
+    //Device ID+ Cookie not found
+  }else{
+    //Device ID+ includes two identifiers – a residue-based identifier and an attribute-based identifier.
+    apg_cookie = JSON.parse(decodeURIComponent(apg_cookie));
+    did_res = apg_cookie.diA,
+    did_attr = apg_cookie.diB;
+  }
 
-  console.log(util.inspect(decodedDeviceID, {showHidden: false, depth: null}))
+  // console.log(util.inspect(decodedDeviceID, {showHidden: false, depth: null}))
 
     request(opts)
       .then((response) => {
-        console.log('Verification response v3:');
-        console.log(response);
+        // console.log('Verification response v3:');
+        // console.log(response);
         const verifResult = {
           success: response['success'],
           score: response['score'] ? response['score'] : -1,
           errors: response['error-codes'] ? response['error-codes'] : []
         };
-
-        let did_res = decodedDeviceID.diA,
-        did_attr = decodedDeviceID.diB;
 
         riskProfile = [{score: verifResult.score, reason: verifResult.errors, timestamp: Date.now(), did_attr: did_attr}];
 
@@ -93,7 +97,7 @@ app.post('/deviceid-recaptcha_v3', (req,res) => {
         riskProfileSession[username][did_res] = riskProfile;
         fraudLogger(JSON.stringify(riskProfileSession));
 
-        console.log(util.inspect(allRiskProfiles, {showHidden: false, depth: null}))
+        // console.log(util.inspect(allRiskProfiles, {showHidden: false, depth: null}))
 
 
         //format object for UI
@@ -110,19 +114,14 @@ app.post('/deviceid-recaptcha_v3', (req,res) => {
       })
 });
 
-// Utility function - returns an object with the cookies' name as keys
 const getAppCookies = (req) => {
-    // We extract the raw cookies from the request headers
-    const rawCookies = req.headers.cookie.split('; ');
-    // rawCookies = ['myapp=secretcookie, 'analytics_cookie=beacon;']
-
-    const parsedCookies = {};
-    rawCookies.forEach(rawCookie=>{
-        const parsedCookie = rawCookie.split('=');
-        // parsedCookie = ['myapp', 'secretcookie'], ['analytics_cookie', 'beacon']
-        parsedCookies[parsedCookie[0]] = parsedCookie[1];
-    });
-    return parsedCookies;
+  const rawCookies = req.headers.cookie.split('; ');
+  const parsedCookies = {};
+  rawCookies.forEach(rawCookie=>{
+    const parsedCookie = rawCookie.split('=');
+    parsedCookies[parsedCookie[0]] = parsedCookie[1];
+  });
+  return parsedCookies;
 };
 
 const fraudLogger = (line) => {

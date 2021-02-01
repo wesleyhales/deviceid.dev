@@ -1,1 +1,6 @@
-docker run -d --restart=unless-stopped -p 443:443 -p 80:8000 -v /tmp:/usr/src/app/logs didr
+
+# See it in action at 
+[deviceid.dev/v3](deviceid.dev/v3])
+
+# Or run locally
+```docker run -d -p 80:8000 wesleyhales/deviceid.dev```
